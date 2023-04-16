@@ -1,7 +1,7 @@
 # Ứng dụng tìm kiếm thông tin bài hát
 
 ## Cài đặt môi trường cho **JavaFX**
-* JavaFX SDK - là thứ **quan trọng nhât**, tải bản 20_x64, tải [ở đây](https://gluonhq.com/products/javafx/)
+* JavaFX SDK - là thứ **quan trọng nhất**, tải bản 20_x64, tải [ở đây](https://gluonhq.com/products/javafx/)
 * Scene Builder cái này dùng để vẽ Scene dễ hơn thông qua kéo thả, tải [ở đây](https://gluonhq.com/products/scene-builder/)
 * Cài đặt môi trường sử dụng cho 2 cái trên
   * Cài đặt JavaFX SDK
