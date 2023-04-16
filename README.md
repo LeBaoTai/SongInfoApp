@@ -1,17 +1,17 @@
 # Ứng dụng tìm kiếm thông tin bài hát
 
 ## Cài đặt môi trường cho **JavaFX**
-* JavaFX SDK - là thứ **quan trọng nhât**, tải bản 20_x64, tải [ở đây][LinkDownJavaFX]
-* Scene Builder cái này dùng để vẽ Scene dễ hơn thông qua kéo thả, tải [ở đây][LinkDownSceneBuilder]
+* JavaFX SDK - là thứ **quan trọng nhât**, tải bản 20_x64, tải [ở đây](https://gluonhq.com/products/javafx/)
+* Scene Builder cái này dùng để vẽ Scene dễ hơn thông qua kéo thả, tải [ở đây](https://gluonhq.com/products/scene-builder/)
 * Cài đặt môi trường sử dụng cho 2 cái trên
   * Cài đặt JavaFX SDK
-    * Intellij Idea: [link này][JavaFXSetupIDea]
-    * Eclipse: [link này][JavaFXSetupEclipse]
-    * Netbeans: [link này][JavaFXSetupNetbeans]
+    * Intellij Idea: [link này](https://www.youtube.com/watch?v=IvsvjUq38Jc&t=575s)
+    * Eclipse: [link này](https://www.youtube.com/watch?v=MND0mbrMgTk)
+    * Netbeans: [link này](https://www.youtube.com/watch?v=6E4IkTuvUCI)
   * Cài đặt Scene Builder
-    * Intellij Idea: [link này][SceneBuilderSetupIdea]
-    * Eclipse: [link này][SceneBuilderSetupEclipse]
-    * Netbeans: [link này][SceneBuilderSetupNetbeans]
+    * Intellij Idea: [link này](https://www.youtube.com/watch?v=-Obxf6NjnbQ&t=515s)
+    * Eclipse: [link này](https://www.youtube.com/watch?v=Dbb69NiQHso&t=572s)
+    * Netbeans: [link này](https://www.youtube.com/watch?v=0ASgJmcQ2vQ)
 
 # Thành viên trong nhóm
 | Mssv       | Tên           |
