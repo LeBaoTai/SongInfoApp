@@ -11,14 +11,14 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.client.controller.MainSceneController">
    <children>
-      <TextField focusTraversable="false" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="450.0" text="Nhập thông tin cần tìm">
+      <TextField fx:id="searchField" focusTraversable="false" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="470.0" text="Nhập thông tin cần tìm">
          <font>
             <Font size="18.0" />
          </font>
       </TextField>
-      <Button alignment="CENTER" layoutX="495.0" layoutY="25.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên bài hát" textAlignment="CENTER" wrapText="true" />
-      <Button alignment="CENTER" layoutX="642.0" layoutY="25.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên ca sĩ" textAlignment="CENTER" wrapText="true" />
-      <Label alignment="CENTER" layoutX="20.0" layoutY="100.0" prefHeight="50.0" prefWidth="470.0" text="Tên bài hát">
+      <Button fx:id="songBtn" alignment="CENTER" layoutX="495.0" layoutY="25.0" mnemonicParsing="false" onAction="#songBtnClick" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên bài hát" textAlignment="CENTER" wrapText="true" />
+      <Button fx:id="singerBtn" alignment="CENTER" layoutX="642.0" layoutY="25.0" mnemonicParsing="false" onAction="#singerBtnClick" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên ca sĩ" textAlignment="CENTER" wrapText="true" />
+      <Label fx:id="nameSongLabel" alignment="CENTER" layoutX="20.0" layoutY="100.0" prefHeight="50.0" prefWidth="470.0" text="Tên bài hát">
          <font>
             <Font size="24.0" />
          </font>

@@ -2,27 +2,35 @@ package main.java.client.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
+import javafx.scene.control.TextField;
+import main.java.client.connect.Connect;
 
 
 public class MainSceneController {
+    private Connect connect;
 
     @FXML
-    private Label myLabel;
+    private Label nameSongLabel;
+    @FXML
+    private TextField searchField;
 
-    public void buttonClick(ActionEvent event) {
-        myLabel.setText("CC");
-        Label nLabel = new Label("This is new window");
-        StackPane stackPane = new StackPane();
-        stackPane.getChildren().add(nLabel);
+    public MainSceneController() throws Exception {
+        connect = new Connect(7777, "localhost");
+    }
 
-        Scene scene = new Scene(stackPane, 440, 100);
-        Stage stage = new Stage();
-        stage.setTitle("New window");
-        stage.setScene(scene);
-        stage.show();
+    @FXML
+    private void songBtnClick(ActionEvent event) {
+        String text = searchField.getText();
+        connect.setInput(text);
+        connect.send();
+        connect.receive();
+        nameSongLabel.setText(connect.getOutput());
+    }
+
+    @FXML
+    private void singerBtnClick(ActionEvent event) {
+        String text = searchField.getText();
+        nameSongLabel.setText(text);
     }
 }
