@@ -1,42 +1,37 @@
 package main.java.server;
 
+import main.java.client.connect.Connect;
+
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
-    private DatagramSocket socket;
-    private DatagramPacket receivePacket;
-    private DatagramPacket sendPacket;
+    private ServerSocket server = null;
+    private int port;
+
     public Server(int port) throws Exception{
-        socket = new DatagramSocket(port);
-        receivePacket = new DatagramPacket(new byte[1024], 1024);
+        server = new ServerSocket(port);
+        this.port = port;
     }
 
-    private void handleClient() {
+    private void handleClient() throws IOException {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         try {
+            System.out.println("Server port: " + port);
             while (true) {
-                socket.receive(receivePacket);
-                String input = new String(receivePacket.getData(), 0, receivePacket.getLength());
-                System.out.println("Server get: " + input);
-
-                sendPacket = new DatagramPacket(
-                        input.toUpperCase().getBytes(),
-                        input.getBytes().length,
-                        receivePacket.getAddress(),
-                        receivePacket.getPort());
-
-                socket.send(sendPacket);
-
+                Socket client = server.accept();
+                executor.execute(new Connect(client));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void processData() {
-        try {
-        } catch (Exception e) {
-            System.out.println(e);
+        if (server != null) {
+            server.close();
         }
     }
 

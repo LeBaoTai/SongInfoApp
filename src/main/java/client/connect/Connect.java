@@ -1,49 +1,65 @@
 package main.java.client.connect;
 
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.security.spec.RSAOtherPrimeInfo;
 
-public class Connect {
-    private DatagramPacket sendPacket;
-    private DatagramPacket receivePacket;
-
-    private DatagramSocket socket;
-    private InetAddress des;
+public class Connect extends Thread {
     private int port;
-    private String input;
-    private String output;
-    public Connect(int port, String hostname) throws Exception{
-        this.port = port;
-        socket = new DatagramSocket();
-        des = InetAddress.getByName(hostname);
+    private Socket socket;
+    private BufferedWriter ouput;
+    private BufferedReader input;
+
+    public Connect(Socket socket) throws Exception{
+        this.socket = socket;
+        System.out.println("Accept Client: " + socket.toString());
     }
 
-    public void send() {
+    public void send(String data) {
         try {
-            byte[] bf = this.input.getBytes();
-            sendPacket = new DatagramPacket(bf, bf.length, des, port);
-            socket.send(sendPacket);
+            ouput = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            ouput.write(data + "\n");
+            ouput.flush();
+//            ouput.close();
         } catch (Exception e) {
-            System.out.println("That bai");
+            e.printStackTrace();
         }
     }
 
-    public void receive() {
+    public String receive() {
         try {
-            receivePacket = new DatagramPacket(new byte[1024], 1024);
-            socket.receive(receivePacket);
-            output = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String data = input.readLine();
+//            input.close();
+            return data;
         } catch (Exception e) {
-            System.out.println("That bai");
+            return "";
         }
     }
-    public void setInput(String str) {
-        input = str;
+
+    private void closeAll() throws IOException {
+        socket.close();
+        ouput.close();
+        input.close();
     }
 
-    public String getOutput() {
-        return output;
+    public String processData(String data) {
+        return data.toUpperCase();
     }
+
+    @Override
+    public void run() {
+        String data = receive();
+        String processedData = processData(data);
+        send(processedData);
+        try {
+            closeAll();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

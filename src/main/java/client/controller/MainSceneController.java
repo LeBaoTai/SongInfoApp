@@ -6,26 +6,47 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import main.java.client.connect.Connect;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+
 
 public class MainSceneController {
-    private Connect connect;
+    private Socket connect;
 
     @FXML
     private Label nameSongLabel;
     @FXML
     private TextField searchField;
 
-    public MainSceneController() throws Exception {
-        connect = new Connect(7777, "localhost");
-    }
+    private final String host = "localhost";
+    private final int port = 7777;
 
     @FXML
     private void songBtnClick(ActionEvent event) {
-        String text = searchField.getText();
-        connect.setInput(text);
-        connect.send();
-        connect.receive();
-        nameSongLabel.setText(connect.getOutput());
+        try {
+            connect = new Socket(host, port);
+            BufferedReader input = new BufferedReader(new InputStreamReader(connect.getInputStream()));
+            BufferedWriter output = new BufferedWriter(new OutputStreamWriter(connect.getOutputStream()));
+
+            // truyen du lieu qua server
+            output.write(searchField.getText() + "\n");
+            output.flush();
+
+            // nhan du lieu tu cai client
+            String reponseData = input.readLine();
+            nameSongLabel.setText(reponseData);
+
+
+            // dong socket, stream
+            connect.close();
+            output.close();
+            input.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

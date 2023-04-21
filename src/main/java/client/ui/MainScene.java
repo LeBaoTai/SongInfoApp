@@ -6,11 +6,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import main.java.client.connect.Connect;
+import main.java.client.controller.MainSceneController;
 
 public class MainScene extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("../../../resources/fxml/MainScene.fxml"));
+        String rootPath = "../../../resources/fxml/";
+//        FXMLLoader fxmlLoader = FXMLLoader.load(getClass().getResource("../../../resources/fxml/MainScene.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(rootPath+"MainScene.fxml"));
+        Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
@@ -18,7 +23,7 @@ public class MainScene extends Application {
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
         launch();
     }
 }
