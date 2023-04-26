@@ -16,14 +16,20 @@
             <Font size="18.0" />
          </font>
       </TextField>
-      <Button fx:id="songBtn" alignment="CENTER" layoutX="495.0" layoutY="25.0" mnemonicParsing="false" onAction="#songBtnClick" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên bài hát" textAlignment="CENTER" wrapText="true" />
-      <Button fx:id="singerBtn" alignment="CENTER" layoutX="642.0" layoutY="25.0" mnemonicParsing="false" onAction="#singerBtnClick" prefHeight="50.0" prefWidth="143.0" text="Tìm kiếm theo tên ca sĩ" textAlignment="CENTER" wrapText="true" />
       <Label fx:id="nameSongLabel" alignment="CENTER" layoutX="20.0" layoutY="100.0" prefHeight="50.0" prefWidth="470.0" text="Tên bài hát">
          <font>
             <Font size="24.0" />
          </font>
       </Label>
-      <TextArea editable="false" layoutX="20.0" layoutY="150.0" prefHeight="430.0" prefWidth="470.0" />
+      <TextArea fx:id="lyricArea" editable="false" layoutX="20.0" layoutY="150.0" prefHeight="430.0" prefWidth="470.0">
+         <font>
+            <Font size="18.0" />
+         </font></TextArea>
+      <Button fx:id="searchBtn" layoutX="501.0" layoutY="22.0" mnemonicParsing="false" onAction="#searchBtnClick" prefHeight="60.0" prefWidth="279.0" text="Tìm kiếm">
+         <font>
+            <Font size="16.0" />
+         </font>
+      </Button>
       <VBox layoutX="500.0" layoutY="100.0" prefHeight="478.0" prefWidth="279.0">
          <children>
             <ListView prefHeight="120.0" prefWidth="270.0" />
