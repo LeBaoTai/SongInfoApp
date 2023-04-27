@@ -98,8 +98,11 @@ public class Connect extends Thread {
             LinkedHashMap<String, String> songInfo = new LinkedHashMap<>();
 
 
-//        System.out.println(yKMVIe.get(0).text());
+//            System.out.println(yKMVIe.get(0).text());
             String songName = yKMVIe.get(0).text();
+
+            songName = songName.split("\\(")[0].strip();
+
             songInfo.putIfAbsent("songName", songName);
 
             Elements wx62f_pzpZlf_x7XAkb = rnct.getElementsByClass("wx62f PZPZlf x7XAkb");
@@ -138,7 +141,6 @@ public class Connect extends Thread {
                     .execute().parse();
             Element listSong = doc.getElementById("left-content");
             Elements songs = listSong.getElementsByClass("list-lyric-song");
-
             String linkLyric = "";
 
             if (songs.size() == 2) {
@@ -150,25 +152,27 @@ public class Connect extends Thread {
                 linkLyric = song.getElementsByTag("a").attr("href");
 //            System.out.println(linkLyric);
             } else if (songs.size() > 2) {
+                System.out.println(songs.get(1));
                 Element tmp = new Element("temp");
+                boolean find = false;
                 for (Element song : songs) {
                     String ten = song.getElementsByClass("ten").text();
                     String nhacsy = song.getElementsByClass("nhacsy").text();
                     if (ten.compareToIgnoreCase(songName) == 0 && nhacsy.compareToIgnoreCase(singerName) == 0) {
                         tmp = song;
+                        find = true;
                         break;
-//                    System.out.println(ten + " " + nhacsy);
-                    }
-                    if (ten.compareToIgnoreCase(songName) == 0) {
-                        tmp = song;
                     }
                 }
-
-                String ten = tmp.getElementsByClass("ten").text();
-                String nhacsy = tmp.getElementsByClass("nhacsy").text();
-                linkLyric = tmp.getElementsByTag("a").attr("href");
-//                System.out.println(ten + " " + nhacsy);
-//                System.out.println(linkLyric);
+//                String ten = tmp.getElementsByClass("ten").text();
+//                String nhacsy = tmp.getElementsByClass("nhacsy").text();
+                if (find ==  true) {
+                    linkLyric = tmp.getElementsByTag("a").attr("href");
+                } else {
+                    Element song = songs.get(1);
+                    System.out.println(song.text());
+                    linkLyric = song.getElementsByTag("a").attr("href");
+                }
             }
             return linkLyric;
         } catch (Exception e) {
