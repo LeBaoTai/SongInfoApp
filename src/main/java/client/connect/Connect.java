@@ -70,6 +70,7 @@ public class Connect extends Thread {
                 songInfo = getLyricFromBHH(link, googleResult);
                 songInfo.putIfAbsent("find", "true");
             }
+
             return songInfo;
         } catch (Exception e) {
             return null;
