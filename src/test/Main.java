@@ -30,7 +30,7 @@ public class Main extends Application {
     private static String getLink() throws IOException {
         String apiLink = "https://vi.wikipedia.org/w/api.php?action=opensearch&search=";
 
-        String name = "Phan Mạnh Quỳnh";
+        String name = "Coldplay";
 
         String url = apiLink + name;
 
@@ -163,20 +163,55 @@ public class Main extends Application {
         return hehe;
     }
 
+    private static String getLyricFromGGSearch(String songName, String singerName) throws Exception{
+        System.out.println(songName + " " + singerName);
+
+        String ggSearchLink = "https://www.google.com/search?q=";
+        String qLBH = "Lời bài hát";
+
+        String fullLink = ggSearchLink + qLBH + " " + songName + " của " + singerName;
+
+        Document doc = Jsoup.connect(fullLink)
+                .execute().parse();
+
+        Element search = doc.getElementById("search");
+
+        Element WbKHeb = search.getElementsByAttributeValue("jsname", "WbKHeb").get(0);
+
+        String lyric = "";
+        Elements ujudUb = WbKHeb.getElementsByClass("ujudUb");
+
+        for (Element spans: ujudUb) {
+            for (Element span: spans.getElementsByTag("span")) {
+//                System.out.println(span.text());
+                lyric += span.text() + "\n";
+            }
+        }
+
+//        System.out.println(ujudUb.get(0).getElementsByTag("span").get(0).text());
+
+//        System.out.println(c.text());
+        return lyric;
+    }
+
     public static void main(String[] args) throws Exception{
-        launch();
+//        launch();
 //        LinkedHashMap<String, String> songInfo = googleSearch();
 //        for (String info: songInfo.values()) {
 //            System.out.println(info);
 //        }
 //        String songName = songInfo.get("songName");
 //        String singerName = songInfo.get("singerName");
+//
+//        System.out.println(getLyricFromGGSearch(songName, singerName));
+//        getLyricFromGGSearch(songName, singerName);
 //        System.out.println(songName + " " + singerName);
 
 //        String link = getLyricVNLink(songName.strip(), singerName.strip());
 //        System.out.println(link);
 
 //        getLyric(link);
+        getLink();
 
     }
 

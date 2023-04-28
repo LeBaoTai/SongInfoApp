@@ -61,23 +61,17 @@ public class Connect extends Thread {
 
     // hàm xử lính dữ liệu chính
     private LinkedHashMap<String, String> processData(String data) {
-        LinkedHashMap<String, String> songInfo = new LinkedHashMap<>();
-        LinkedHashMap<String, String> googleResult = getResponseFromGoogle(data);
-        String songName = googleResult.get("songName").strip();
-        String singerName = googleResult.get("singerName").strip();
-
-        if (singerName != null && songName != null) {
-            String linkLyric = getLyricLink(songName, singerName);
-
-            if (linkLyric != null) {
-                songInfo.putIfAbsent("songName", songName);
-                songInfo.putIfAbsent("singerName", singerName);
-                String lyric = getLyric(linkLyric);
-                songInfo.putIfAbsent("songLyric", lyric);
+        try {
+            LinkedHashMap<String, String> googleResult = getResponseFromGoogle(data);
+            LinkedHashMap<String, String> songInfo = getLyricFromGG(googleResult);
+            if (songInfo == null) {
+                String link = getLinkLyricFromBHH(  googleResult);
+                songInfo = getLyricFromBHH(link, googleResult);
             }
+            return songInfo;
+        } catch (Exception e) {
+            return null;
         }
-
-        return songInfo != null? songInfo : null;
     }
 
     // dùng gg search để tìm tên bài hát và ca sĩ
@@ -126,87 +120,95 @@ public class Connect extends Thread {
         }
     }
 
-    // lấy link của bài hát
-    private String getLyricLink(String songName, String singerName) {
-//        System.out.println(songName);
-//        System.out.println(singerName);
+    // lấy lời bài hát từ gg search
+    private LinkedHashMap<String, String> getLyricFromGG(LinkedHashMap<String, String> songInfo) {
         try {
-            String url = "https://loibaihat.biz/timkiem/?keyword=";
-//        String songName = "vợ người ta";
-            String fullLink = url + URLEncoder.encode(songName, StandardCharsets.UTF_8);
+            LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
+
+            String songName = songInfo.get("songName");
+            String singerName = songInfo.get("singerName");
+
+            returnHashMap.putIfAbsent("songName", songName);
+            returnHashMap.putIfAbsent("singerName", singerName);
+
+            String ggSearchLink = "https://www.google.com/search?q=";
+            String qLBH = "Lời bài hát";
+
+            String fullLink = ggSearchLink + qLBH + " " + songName + " của " + singerName;
 
             Document doc = Jsoup.connect(fullLink)
-                    .method(Connection.Method.GET)
-                    .ignoreContentType(true)
                     .execute().parse();
-            Element listSong = doc.getElementById("left-content");
-            Elements songs = listSong.getElementsByClass("list-lyric-song");
-            String linkLyric = "";
 
-            if (songs.size() == 2) {
-                Element song = songs.get(1);
-                String ten = song.getElementsByClass("ten").text();
-                String nhacsy = song.getElementsByClass("nhacsy").text();
+            Element search = doc.getElementById("search");
+            Element WbKHeb = search.getElementsByAttributeValue("jsname", "WbKHeb").get(0);
+            Elements ujudUb = WbKHeb.getElementsByClass("ujudUb");
 
-//            System.out.println(ten + " " + nhacsy);
-                linkLyric = song.getElementsByTag("a").attr("href");
-//            System.out.println(linkLyric);
-            } else if (songs.size() > 2) {
-                System.out.println(songs.get(1));
-                Element tmp = new Element("temp");
-                boolean find = false;
-                for (Element song : songs) {
-                    String ten = song.getElementsByClass("ten").text();
-                    String nhacsy = song.getElementsByClass("nhacsy").text();
-                    if (ten.compareToIgnoreCase(songName) == 0 && nhacsy.compareToIgnoreCase(singerName) == 0) {
-                        tmp = song;
-                        find = true;
-                        break;
-                    }
-                }
-//                String ten = tmp.getElementsByClass("ten").text();
-//                String nhacsy = tmp.getElementsByClass("nhacsy").text();
-                if (find ==  true) {
-                    linkLyric = tmp.getElementsByTag("a").attr("href");
-                } else {
-                    Element song = songs.get(1);
-                    System.out.println(song.text());
-                    linkLyric = song.getElementsByTag("a").attr("href");
+            String lyric = "";
+
+            for (Element spans: ujudUb) {
+                for (Element span: spans.getElementsByTag("span")) {
+//                System.out.println(span.text());
+                    lyric += span.text() + "\n";
                 }
             }
-            return linkLyric;
+
+            returnHashMap.putIfAbsent("songLyric", lyric);
+
+            return returnHashMap;
         } catch (Exception e) {
             return null;
         }
     }
 
-    // lấy lời bài hát
-    private String getLyric(String linkLyric) {
+    // lấy link lời bài hát từ baihathay.net
+    private String getLinkLyricFromBHH(LinkedHashMap<String, String> songInfo) {
         try {
-            String domain = "https://loibaihat.biz";
-            String fullLink = domain + linkLyric;
+            String bhhLink = "https://baihathay.net/music/tim-kiem/";
+            String fullLink = bhhLink + songInfo.get("songName") + "/trang-1.html";
 
             Document doc = Jsoup.connect(fullLink)
-                    .method(Connection.Method.GET)
                     .execute().parse();
 
-            Element playLyric = doc.getElementById("play-lyric");
+            String link = "";
+            String singerName = songInfo.get("singerName").strip();
+            String songName = songInfo.get("songName").strip();
 
-            Element lyricSong = playLyric.getElementsByClass("lyric-song").get(0);
+            Element pureMenuList = doc.getElementsByClass("pure-menu-list").last();
+            for (Element pureMenuItem: pureMenuList.getElementsByClass("pure-menu-item")) {
+                String song = pureMenuItem.text();
+//                int len = song.split("-").length;
+                String singer  = song.split("-")[1].strip();
 
-//        System.out.println(lyricSong.text());
-//        String lyricText = lyricSong;
-
-//        System.out.println(lyricSong.toString().split("<br>")[1].strip());
-            String[] subStringLyric = lyricSong.toString().split("<br>");
-            int lengthLyric = lyricSong.toString().split("<br>").length;
-            String fullLyric = "";
-            for (int i = 1; i < lengthLyric - 1; i++) {
-                fullLyric += subStringLyric[i].strip() + "\n";
+                if (singer.compareToIgnoreCase(singerName) == 0) {
+                    link = pureMenuItem.getElementsByTag("a").first().attr("href");
+                    break;
+                }
             }
 
-//        System.out.println(hehe);
-            return fullLyric;
+            System.out.println(link);
+            return link;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // lấy lời bài hát từ baihathay.net
+    private LinkedHashMap<String, String> getLyricFromBHH(String linkLyric, LinkedHashMap<String, String> songInfo) {
+        try {
+            linkLyric = "https://baihathay.net" + linkLyric;
+            Document doc = Jsoup.connect(linkLyric)
+                    .execute().parse();
+
+            Element tabLyric = doc.getElementsByClass("tab-lyrics").last();
+            String lyric = tabLyric.toString().split("\n")[1].replaceAll("<br>", "\n");
+
+            LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
+
+            returnHashMap.putIfAbsent("singerName", songInfo.get("singerName"));
+            returnHashMap.putIfAbsent("songName", songInfo.get("songName"));
+            returnHashMap.putIfAbsent("songLyric", lyric);
+
+            return returnHashMap;
         } catch (Exception e) {
             return null;
         }
