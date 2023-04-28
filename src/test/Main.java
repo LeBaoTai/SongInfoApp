@@ -211,8 +211,11 @@ public class Main extends Application {
 //        System.out.println(link);
 
 //        getLyric(link);
-        getLink();
+//        getLink();
+        String hehe = "Hoa Nở Không Màu - Hoài Lâm - Sáng tác: Nguyễn Minh Cường";
 
+        System.out.println(hehe.split("-").length);
+        System.out.println(hehe.split("-")[1].strip());
     }
 
     private static ArrayList<String> getInfoSinger(String rawInfo) {

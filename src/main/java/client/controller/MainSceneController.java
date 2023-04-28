@@ -45,7 +45,11 @@ public class MainSceneController {
             if (responseData != null) {
                 lyricArea.setText(responseData.get("songLyric"));
                 nameSongLabel.setText(responseData.get("songName"));
+            } else {
+                nameSongLabel.setText("Không có lyric cho bài hát này");
+                lyricArea.setText("Rỗng");
             }
+
 
             // nhan du lieu tu cai client
 //            String reponseData = input.readLine();

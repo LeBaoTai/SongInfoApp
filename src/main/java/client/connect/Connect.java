@@ -64,9 +64,11 @@ public class Connect extends Thread {
         try {
             LinkedHashMap<String, String> googleResult = getResponseFromGoogle(data);
             LinkedHashMap<String, String> songInfo = getLyricFromGG(googleResult);
+//            System.out.println(songInfo);
             if (songInfo == null) {
                 String link = getLinkLyricFromBHH(  googleResult);
                 songInfo = getLyricFromBHH(link, googleResult);
+                songInfo.putIfAbsent("find", "true");
             }
             return songInfo;
         } catch (Exception e) {
@@ -163,15 +165,18 @@ public class Connect extends Thread {
     // lấy link lời bài hát từ baihathay.net
     private String getLinkLyricFromBHH(LinkedHashMap<String, String> songInfo) {
         try {
+            String songName = songInfo.get("songName").strip();
+            if (songName.contains("|")) {
+                String[] sub = songName.split("\\|");
+                songName = sub[1].strip();
+            }
             String bhhLink = "https://baihathay.net/music/tim-kiem/";
-            String fullLink = bhhLink + songInfo.get("songName") + "/trang-1.html";
+            String fullLink = bhhLink + songName + "/trang-1.html";
 
             Document doc = Jsoup.connect(fullLink)
                     .execute().parse();
-
             String link = "";
             String singerName = songInfo.get("singerName").strip();
-            String songName = songInfo.get("songName").strip();
 
             Element pureMenuList = doc.getElementsByClass("pure-menu-list").last();
             for (Element pureMenuItem: pureMenuList.getElementsByClass("pure-menu-item")) {
@@ -184,8 +189,6 @@ public class Connect extends Thread {
                     break;
                 }
             }
-
-            System.out.println(link);
             return link;
         } catch (Exception e) {
             return null;
@@ -200,7 +203,11 @@ public class Connect extends Thread {
                     .execute().parse();
 
             Element tabLyric = doc.getElementsByClass("tab-lyrics").last();
-            String lyric = tabLyric.toString().split("\n")[1].replaceAll("<br>", "\n");
+            String lyric = tabLyric.toString().split("\n")[1]
+                    .replaceAll("<br>", "\n")
+                    .replaceAll("<p>", "")
+                    .replaceAll("</p>", "");
+
 
             LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
 
