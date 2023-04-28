@@ -79,11 +79,11 @@ public class Connect extends Thread {
     // dùng gg search để tìm tên bài hát và ca sĩ
     private LinkedHashMap<String, String> getResponseFromGoogle(String data) {
         try {
-            String ggSearchLink = "https://www.google.com/search?q=";
+            String ggSearchUrl = "https://www.google.com/search?q=";
 
-            String fullLink = ggSearchLink + data;
+            String fullUrl = ggSearchUrl + data;
 
-            Document document = Jsoup.connect(fullLink)
+            Document document = Jsoup.connect(fullUrl)
                     .method(Connection.Method.GET)
                     .execute().parse();
 
@@ -98,7 +98,10 @@ public class Connect extends Thread {
             String songName = yKMVIe.get(0).text();
 
             songName = songName.split("\\(")[0].strip();
-
+            if (songName.contains("|")) {
+                String[] sub = songName.split("\\|");
+                songName = sub[1].strip();
+            }
             songInfo.putIfAbsent("songName", songName);
 
             Elements wx62f_pzpZlf_x7XAkb = rnct.getElementsByClass("wx62f PZPZlf x7XAkb");
@@ -133,12 +136,12 @@ public class Connect extends Thread {
             returnHashMap.putIfAbsent("songName", songName);
             returnHashMap.putIfAbsent("singerName", singerName);
 
-            String ggSearchLink = "https://www.google.com/search?q=";
+            String ggSearchUrl = "https://www.google.com/search?q=";
             String qLBH = "Lời bài hát";
 
-            String fullLink = ggSearchLink + qLBH + " " + songName + " của " + singerName;
+            String fullUrl = ggSearchUrl + qLBH + " " + songName + " của " + singerName;
 
-            Document doc = Jsoup.connect(fullLink)
+            Document doc = Jsoup.connect(fullUrl)
                     .execute().parse();
 
             Element search = doc.getElementById("search");
@@ -166,18 +169,15 @@ public class Connect extends Thread {
     private String getLinkLyricFromBHH(LinkedHashMap<String, String> songInfo) {
         try {
             String songName = songInfo.get("songName").strip();
-            if (songName.contains("|")) {
-                String[] sub = songName.split("\\|");
-                songName = sub[1].strip();
-            }
-            String bhhLink = "https://baihathay.net/music/tim-kiem/";
-            String fullLink = bhhLink + songName + "/trang-1.html";
-
-            Document doc = Jsoup.connect(fullLink)
-                    .execute().parse();
-            String link = "";
             String singerName = songInfo.get("singerName").strip();
 
+            String bhhUrl = "https://baihathay.net/music/tim-kiem/";
+            String fullUrl = bhhUrl + songName + "/trang-1.html";
+
+            Document doc = Jsoup.connect(fullUrl)
+                    .execute().parse();
+
+            String link = "";
             Element pureMenuList = doc.getElementsByClass("pure-menu-list").last();
             for (Element pureMenuItem: pureMenuList.getElementsByClass("pure-menu-item")) {
                 String song = pureMenuItem.text();
@@ -198,8 +198,8 @@ public class Connect extends Thread {
     // lấy lời bài hát từ baihathay.net
     private LinkedHashMap<String, String> getLyricFromBHH(String linkLyric, LinkedHashMap<String, String> songInfo) {
         try {
-            linkLyric = "https://baihathay.net" + linkLyric;
-            Document doc = Jsoup.connect(linkLyric)
+            String fullUrl = "https://baihathay.net" + linkLyric;
+            Document doc = Jsoup.connect(fullUrl)
                     .execute().parse();
 
             Element tabLyric = doc.getElementsByClass("tab-lyrics").last();
