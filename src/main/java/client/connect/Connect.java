@@ -1,5 +1,6 @@
 package main.java.client.connect;
 
+import org.json.JSONArray;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -18,19 +19,19 @@ public class Connect extends Thread {
     private Socket socket;
     private BufferedWriter ouput;
     private BufferedReader input;
+    private ObjectOutputStream outputOb;
 
     public Connect(Socket socket) throws Exception{
         this.socket = socket;
         System.out.println("Accept Client: " + socket.toString());
+        outputOb = new ObjectOutputStream(socket.getOutputStream());
+        input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
 
     // gửi dữ liệu qua client
     private void send(LinkedHashMap data) {
         try {
-            ObjectOutputStream outputOb = new ObjectOutputStream(socket.getOutputStream());
             outputOb.writeObject(data);
-            outputOb.close();
-
 //            ouput = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 //            ouput.write(data + "\n");
 //            ouput.flush();
@@ -43,7 +44,6 @@ public class Connect extends Thread {
     // nhận từ client
     private String receive() {
         try {
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String data = input.readLine();
             System.out.println(data);
             return data;
@@ -55,7 +55,7 @@ public class Connect extends Thread {
     // đóng cái stream
     private void closeAll() throws IOException {
         socket.close();
-//        ouput.close();
+        ouput.close();
         input.close();
     }
 
@@ -63,15 +63,22 @@ public class Connect extends Thread {
     private LinkedHashMap<String, String> processData(String data) {
         try {
             LinkedHashMap<String, String> googleResult = getResponseFromGoogle(data);
-            LinkedHashMap<String, String> songInfo = getLyricFromGG(googleResult);
-//            System.out.println(songInfo);
-            if (songInfo == null) {
-                String link = getLinkLyricFromBHH(  googleResult);
-                songInfo = getLyricFromBHH(link, googleResult);
-                songInfo.putIfAbsent("find", "true");
-            }
 
-            return songInfo;
+            String title = googleResult.get("title");
+            String subTitle = googleResult.get("subTitle");
+            if (subTitle.contains("Bài hát")) {
+                LinkedHashMap<String, String> songInfo = getLyricFromGG(googleResult);
+                if (songInfo == null) {
+                    String link = getLinkLyricFromBHH(  googleResult);
+                    songInfo = getLyricFromBHH(link, googleResult);
+                    songInfo.putIfAbsent("find", "true");
+                }
+                return songInfo;
+            } else {
+                System.out.println("Ca si");
+                System.out.println(title);
+            }
+            return null;
         } catch (Exception e) {
             return null;
         }
@@ -96,31 +103,32 @@ public class Connect extends Thread {
 
 
 //            System.out.println(yKMVIe.get(0).text());
-            String songName = yKMVIe.get(0).text();
+            String title = yKMVIe.get(0).text();
 
-            songName = songName.split("\\(")[0].strip();
-            if (songName.contains("|")) {
-                String[] sub = songName.split("\\|");
-                songName = sub[1].strip();
+            title = title.split("\\(")[0].strip();
+            if (title.contains("|")) {
+                String[] sub = title.split("\\|");
+                title = sub[1].strip();
             }
-            songInfo.putIfAbsent("songName", songName);
+            songInfo.putIfAbsent("title", title);
 
             Elements wx62f_pzpZlf_x7XAkb = rnct.getElementsByClass("wx62f PZPZlf x7XAkb");
             String[] splitString = wx62f_pzpZlf_x7XAkb.get(0).text().split("\\s");
+            String subTitle = wx62f_pzpZlf_x7XAkb.get(0).text();
 
             String singerName = "";
             for (int i = 3; i < splitString.length; i++) {
                 singerName += splitString[i] + " ";
             }
 //        System.out.println(singerName);
-            songInfo.putIfAbsent("singerName", singerName);
+            songInfo.putIfAbsent("subTitle", subTitle);
 
             return songInfo;
         } catch (Exception e) {
             LinkedHashMap<String, String> tmp = new LinkedHashMap<>();
 
-            tmp.putIfAbsent("songName", null);
-            tmp.putIfAbsent("singerName", null);
+            tmp.putIfAbsent("title", null);
+            tmp.putIfAbsent("subTitle", null);
 
             return tmp;
         }
@@ -131,8 +139,8 @@ public class Connect extends Thread {
         try {
             LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
 
-            String songName = songInfo.get("songName");
-            String singerName = songInfo.get("singerName");
+            String songName = songInfo.get("title");
+            String singerName = songInfo.get("subTitle");
 
             returnHashMap.putIfAbsent("songName", songName);
             returnHashMap.putIfAbsent("singerName", singerName);
@@ -169,8 +177,8 @@ public class Connect extends Thread {
     // lấy link lời bài hát từ baihathay.net
     private String getLinkLyricFromBHH(LinkedHashMap<String, String> songInfo) {
         try {
-            String songName = songInfo.get("songName").strip();
-            String singerName = songInfo.get("singerName").strip();
+            String songName = songInfo.get("title").strip();
+            String singerName = songInfo.get("subTitle").strip();
 
             String bhhUrl = "https://baihathay.net/music/tim-kiem/";
             String fullUrl = bhhUrl + songName + "/trang-1.html";
@@ -212,8 +220,8 @@ public class Connect extends Thread {
 
             LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
 
-            returnHashMap.putIfAbsent("singerName", songInfo.get("singerName"));
-            returnHashMap.putIfAbsent("songName", songInfo.get("songName"));
+            returnHashMap.putIfAbsent("singerName", songInfo.get("subTitle"));
+            returnHashMap.putIfAbsent("songName", songInfo.get("title"));
             returnHashMap.putIfAbsent("songLyric", lyric);
 
             return returnHashMap;
@@ -222,16 +230,46 @@ public class Connect extends Thread {
         }
     }
 
+    private String getLinkFormWiki(String name) {
+        try {
+            String apiLink = "https://vi.wikipedia.org/w/api.php?action=opensearch&search=";
+            String url = apiLink + name;
+
+            Document doc = Jsoup.connect(url)
+                    .method(Connection.Method.GET)
+                    .ignoreContentType(true)
+                    .execute().parse();
+
+            JSONArray json = new JSONArray(doc.text());
+
+            JSONArray links = (JSONArray) json.get(3);
+
+            String link = links.get(0).toString();
+
+            String[] subString = link.split("/");
+            String singerName = subString[subString.length - 1];
+            String decodeSingerName = URLDecoder.decode(singerName, StandardCharsets.UTF_8);
+            System.out.println(decodeSingerName);
+
+
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // hàm run từ thread
     @Override
     public void run() {
-        String data = receive();
-        LinkedHashMap<String, String> processedData = processData(data);
-        send(processedData);
-        try {
-            closeAll();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        while (true) {
+            String data = receive();
+            LinkedHashMap<String, String> processedData = processData(data);
+            send(processedData);
+//        try {
+//            closeAll();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         }
     }
 }

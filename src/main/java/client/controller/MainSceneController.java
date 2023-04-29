@@ -13,8 +13,6 @@ import java.util.HashMap;
 
 
 public class MainSceneController {
-    private Socket connect;
-
     @FXML
     private Label nameSongLabel;
     @FXML
@@ -24,21 +22,31 @@ public class MainSceneController {
 
     private final String host = "localhost";
     private final int port = 7777;
+    private Socket conn;
+    private BufferedReader input = null;
+    private BufferedWriter output = null;
+    private ObjectInputStream inputOb = null;
+
+    public MainSceneController() {
+        try {
+            conn = new Socket(host, port);
+            input = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            output = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            inputOb = new ObjectInputStream(conn.getInputStream());
+        } catch (Exception e) {
+            System.out.println("Khong the tao client");
+        }
+
+    }
 
     @FXML
     private void searchBtnClick(ActionEvent event) {
         try {
-            connect = new Socket(host, port);
-            BufferedReader input = new BufferedReader(new InputStreamReader(connect.getInputStream()));
-            BufferedWriter output = new BufferedWriter(new OutputStreamWriter(connect.getOutputStream()));
-
-//            InputStream
 
             // truyen du lieu qua server
             output.write(searchField.getText() + "\n");
             output.flush();
 
-            ObjectInputStream inputOb = new ObjectInputStream(connect.getInputStream());
             HashMap<String, String> responseData = (HashMap<String, String>) inputOb.readObject();
 
             // kiem tra du lieu tu server
@@ -58,9 +66,6 @@ public class MainSceneController {
 //            System.out.println(responseData.get("singerName"));
 
             // dong socket, stream
-            connect.close();
-            output.close();
-            input.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

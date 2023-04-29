@@ -30,7 +30,7 @@ public class Main extends Application {
     private static String getLink() throws IOException {
         String apiLink = "https://vi.wikipedia.org/w/api.php?action=opensearch&search=";
 
-        String name = "Coldplay";
+        String name = "ca sĩ nguyễn việt hoàng";
 
         String url = apiLink + name;
 
@@ -211,11 +211,8 @@ public class Main extends Application {
 //        System.out.println(link);
 
 //        getLyric(link);
-//        getLink();
-        String hehe = "Hoa Nở Không Màu - Hoài Lâm - Sáng tác: Nguyễn Minh Cường";
+        getLink();
 
-        System.out.println(hehe.split("-").length);
-        System.out.println(hehe.split("-")[1].strip());
     }
 
     private static ArrayList<String> getInfoSinger(String rawInfo) {
