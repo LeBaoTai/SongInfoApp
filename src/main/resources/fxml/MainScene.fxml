@@ -12,7 +12,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.client.controller.MainSceneController">
    <children>
-      <TextField fx:id="searchField" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="470.0" text="Nhập thông tin cần tìm">
+      <TextField fx:id="searchField" focusTraversable="false" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="470.0" promptText="Nhập thông tin cần tìm">
          <font>
             <Font size="18.0" />
          </font>
@@ -22,11 +22,11 @@
             <Font size="24.0" />
          </font>
       </Label>
-      <TextArea fx:id="lyricArea" editable="false" layoutX="20.0" layoutY="150.0" prefHeight="430.0" prefWidth="470.0">
+      <TextArea fx:id="lyricArea" editable="false" focusTraversable="false" layoutX="20.0" layoutY="150.0" prefHeight="430.0" prefWidth="470.0">
          <font>
             <Font size="18.0" />
          </font></TextArea>
-      <Button fx:id="searchBtn" layoutX="501.0" layoutY="22.0" mnemonicParsing="false" onAction="#searchBtnClick" prefHeight="60.0" prefWidth="279.0" style="-fx-border-color: #42f5cb;" text="Tìm kiếm">
+      <Button fx:id="searchBtn" focusTraversable="false" layoutX="501.0" layoutY="22.0" mnemonicParsing="false" onAction="#searchBtnClick" prefHeight="60.0" prefWidth="279.0" style="-fx-border-color: #42f5cb;" text="Tìm kiếm">
          <font>
             <Font size="16.0" />
          </font>
@@ -36,9 +36,9 @@
       </Button>
       <VBox layoutX="500.0" layoutY="100.0" prefHeight="478.0" prefWidth="279.0">
          <children>
-            <ListView prefHeight="120.0" prefWidth="270.0" />
-            <ListView prefHeight="161.0" prefWidth="270.0" />
-            <ListView prefHeight="200.0" prefWidth="200.0" />
+            <ListView focusTraversable="false" prefHeight="120.0" prefWidth="270.0" />
+            <ListView focusTraversable="false" prefHeight="161.0" prefWidth="270.0" />
+            <ListView focusTraversable="false" prefHeight="200.0" prefWidth="200.0" />
          </children>
       </VBox>
    </children>

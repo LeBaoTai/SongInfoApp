@@ -68,6 +68,7 @@ public class Connect extends Thread {
             String subTitle = googleResult.get("subTitle");
             if (subTitle.contains("Bài hát")) {
                 LinkedHashMap<String, String> songInfo = getLyricFromGG(googleResult);
+                System.out.println(subTitle);
                 if (songInfo == null) {
                     String link = getLinkLyricFromBHH(  googleResult);
                     songInfo = getLyricFromBHH(link, googleResult);
