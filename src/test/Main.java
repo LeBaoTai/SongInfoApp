@@ -211,8 +211,9 @@ public class Main extends Application {
 //        System.out.println(link);
 
 //        getLyric(link);
-        getLink();
+//        getLink();
 
+        googleSearch();
     }
 
     private static ArrayList<String> getInfoSinger(String rawInfo) {
@@ -264,7 +265,7 @@ public class Main extends Application {
         LinkedHashMap<String, String> songInfo = new LinkedHashMap<>();
 
 
-//        System.out.println(yKMVIe.get(0).text());
+        System.out.println(yKMVIe.get(0).text());
         String songName = yKMVIe.get(0).text();
         songInfo.putIfAbsent("songName", songName);
 
@@ -275,7 +276,7 @@ public class Main extends Application {
         for (int i = 3; i < splitString.length; i++) {
             singerName += splitString[i] + " ";
         }
-//        System.out.println(singerName);
+        System.out.println(singerName);
         songInfo.putIfAbsent("singerName", singerName);
 
         return songInfo;
