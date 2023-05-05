@@ -4,6 +4,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 SongInfoApp.iml
+Doan.iml
 
 ### Eclipse ###
 .apt_generated
