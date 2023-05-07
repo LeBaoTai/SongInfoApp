@@ -10,36 +10,42 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.client.controller.MainSceneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="603.0" prefWidth="994.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.client.controller.MainSceneController">
    <children>
-      <TextField fx:id="searchField" focusTraversable="false" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="470.0" promptText="Nhập thông tin cần tìm">
+      <TextField fx:id="searchField" focusTraversable="false" layoutX="20.0" layoutY="20.0" prefHeight="60.0" prefWidth="654.0" promptText="Nhập thông tin cần tìm" style="-fx-background-radius: 20;">
          <font>
             <Font size="18.0" />
          </font>
       </TextField>
-      <Label fx:id="nameSongLabel" alignment="CENTER" layoutX="20.0" layoutY="100.0" prefHeight="50.0" prefWidth="470.0" text="Tên bài hát">
+      <Label fx:id="nameSongLabel" alignment="CENTER" layoutX="22.0" layoutY="101.0" prefHeight="50.0" prefWidth="654.0" text="Tên bài hát" textAlignment="CENTER">
          <font>
             <Font size="24.0" />
          </font>
       </Label>
-      <TextArea fx:id="lyricArea" editable="false" focusTraversable="false" layoutX="20.0" layoutY="150.0" prefHeight="430.0" prefWidth="470.0">
+      <TextArea fx:id="lyricArea" editable="false" focusTraversable="false" layoutX="22.0" layoutY="189.0" prefHeight="393.0" prefWidth="654.0" style="-fx-background-radius: 5;" AnchorPane.bottomAnchor="21.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="189.0">
          <font>
             <Font size="18.0" />
          </font></TextArea>
-      <Button fx:id="searchBtn" focusTraversable="false" layoutX="501.0" layoutY="22.0" mnemonicParsing="false" onAction="#searchBtnClick" prefHeight="60.0" prefWidth="279.0" style="-fx-border-color: #42f5cb;" text="Tìm kiếm">
+      <Button fx:id="searchBtn" focusTraversable="false" layoutX="700.0" layoutY="20.0" mnemonicParsing="false" onAction="#searchBtnClick" prefHeight="60.0" prefWidth="279.0" style="-fx-border-radius: 20; -fx-border-color: #A4D0A4; -fx-background-radius: 20; -fx-border-width: 2; -fx-font-weight: bold;" text="Tìm kiếm" textFill="#ff6969">
          <font>
-            <Font size="16.0" />
+            <Font size="18.0" />
          </font>
          <cursor>
-            <Cursor fx:constant="DEFAULT" />
+            <Cursor fx:constant="OPEN_HAND" />
          </cursor>
       </Button>
-      <VBox layoutX="500.0" layoutY="100.0" prefHeight="478.0" prefWidth="279.0">
+      <VBox layoutX="700.0" layoutY="110.0" prefHeight="478.0" prefWidth="279.0" style="-fx-background-radius: 5;">
          <children>
-            <ListView focusTraversable="false" prefHeight="120.0" prefWidth="270.0" />
+            <ListView focusTraversable="false" prefHeight="120.0" prefWidth="270.0" style="-fx-background-radius: 5 5 0 0;" />
             <ListView focusTraversable="false" prefHeight="161.0" prefWidth="270.0" />
-            <ListView focusTraversable="false" prefHeight="200.0" prefWidth="200.0" />
+            <ListView focusTraversable="false" prefHeight="200.0" prefWidth="200.0" style="-fx-background-radius: 0 0 5 5;" />
          </children>
       </VBox>
+      <Button fx:id="watchBtn" disable="true" focusTraversable="false" layoutX="545.0" layoutY="155.0" mnemonicParsing="false" onAction="#watchVideoClick" prefHeight="30.0" prefWidth="131.0" scaleShape="false" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FF6969;" text="Xem Video" AnchorPane.bottomAnchor="418.0" AnchorPane.leftAnchor="545.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="155.0" />
+      <Label alignment="CENTER" layoutX="22.0" layoutY="155.0" prefHeight="27.0" prefWidth="380.0" text="Nhạc sĩ" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="468.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>

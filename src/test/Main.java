@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Scanner;
+import java.util.jar.JarOutputStream;
 
 
 public class Main extends Application {
@@ -212,8 +213,8 @@ public class Main extends Application {
 
 //        getLyric(link);
 //        getLink();
+        getLinkVideo();
 
-        googleSearch();
     }
 
     private static ArrayList<String> getInfoSinger(String rawInfo) {
@@ -280,6 +281,28 @@ public class Main extends Application {
         songInfo.putIfAbsent("singerName", singerName);
 
         return songInfo;
+    }
+
+    private static void getLinkVideo() throws Exception {
+        String domain = "https://youtube.googleapis.com/youtube/v3/search?";
+        String part = "snippet";
+        String key = "AIzaSyCyZnpwPZLmn7zXxghBaKONKuJheJV4bfM";
+        int maxResults = 25;
+        String q = "hello adele";
+        q = URLEncoder.encode(q, StandardCharsets.UTF_8);
+        String fullLink = domain + "part=" + part + "&maxResults=" + maxResults
+                + "&q=" + q + "&key=" + key;
+
+        fullLink = "http://ip-api.com/json/24.48.0.1";
+        System.out.println(fullLink);
+        Document doc = Jsoup.connect(fullLink)
+                .method(Connection.Method.GET)
+                .ignoreContentType(true)
+                .execute().parse();
+
+        JSONObject json = new JSONObject(doc.text());
+        System.out.println(json.get("regionName"));
+
     }
 
     @Override
