@@ -193,6 +193,13 @@ public class Connect implements Runnable {
     private String getLinkLyricFromBHH(LinkedHashMap<String, String> songInfo) {
         try {
             String songName = songInfo.get("title").strip();
+            songName = songName.replaceAll("\\?", "")
+                    .replaceAll("\\*", "")
+                    .replaceAll("\\[", "")
+                    .replaceAll("\\]", "")
+                    .replaceAll("\\$", "")
+                    .replaceAll("\\^", "");
+
             String singerName = "";
             String[] subString = songInfo.get("subTitle").strip().split(" ");
 
@@ -218,9 +225,14 @@ public class Connect implements Runnable {
                     link = pureMenuItem.getElementsByTag("a").first().attr("href");
                     break;
                 }
+                if (singer.contains(singerName.strip())) {
+                    link = pureMenuItem.getElementsByTag("a").first().attr("href");
+                    break;
+                }
             }
             return link;
         } catch (Exception e) {
+            System.out.println("Can't get link from BHH");
             return null;
         }
     }
@@ -237,7 +249,8 @@ public class Connect implements Runnable {
             String lyric = tabLyric.toString().split("\n")[1]
                     .replaceAll("<br>", "\n")
                     .replaceAll("<p>", "")
-                    .replaceAll("</p>", "");
+                    .replaceAll("</p>", "")
+                    .strip();
 
 
             LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
@@ -282,8 +295,11 @@ public class Connect implements Runnable {
 
     private void mySleep() {
         Random ran = new Random();
-        int ranNum = 500 + ran.nextInt(400);
-        for (int i = 0; i < ranNum; i++);
+        int ranNum = 1000 + ran.nextInt(400);
+        int num = 1;
+        for (int i = 0; i < ranNum; i++) {
+            num += ranNum * 3 / 2 + ranNum;
+        }
     }
 
     // hàm run từ thread

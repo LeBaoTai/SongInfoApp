@@ -213,7 +213,9 @@ public class Main extends Application {
 
 //        getLyric(link);
 //        getLink();
-        getLinkVideo();
+        String s = "bao tieng 1 mo?";
+
+        System.out.println(s.replaceAll("\\?", ""));
 
     }
 
