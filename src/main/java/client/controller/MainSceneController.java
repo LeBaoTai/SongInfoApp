@@ -34,8 +34,10 @@ public class MainSceneController {
     private TextArea lyricArea;
     @FXML
     private Button watchBtn;
+    @FXML
+    private Label composerNameLabel;
 
-    private final String host = "localhost";
+    private String host;
     private final int port = 7777;
 
     private Socket conn;
@@ -74,9 +76,15 @@ public class MainSceneController {
             if (responseData != null) {
                 lyricArea.setText(responseData.get("songLyric"));
                 nameSongLabel.setText(responseData.get("songName"));
+                if(responseData.get("songComposer") == null) {
+                    composerNameLabel.setText("Sáng tác: Unknown");
+                } else {
+                    composerNameLabel.setText("Sáng tác: " + responseData.get("songComposer"));
+                }
                 watchBtn.setDisable(false);
             } else {
                 nameSongLabel.setText("Không có lyric cho bài hát này");
+                composerNameLabel.setText("Không có lyric cho bài hát này");
                 lyricArea.setText("Rỗng");
             }
 
@@ -137,5 +145,9 @@ public class MainSceneController {
         } catch (Exception e) {
             System.out.println("Can't close all STREAM!!!");
         }
+    }
+
+    public void setHost(String host){
+        this.host = host;
     }
 }

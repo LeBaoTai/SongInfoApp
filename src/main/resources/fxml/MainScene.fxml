@@ -42,7 +42,7 @@
          </children>
       </VBox>
       <Button fx:id="watchBtn" disable="true" focusTraversable="false" layoutX="545.0" layoutY="155.0" mnemonicParsing="false" onAction="#watchVideoClick" prefHeight="30.0" prefWidth="131.0" scaleShape="false" style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #FF6969;" text="Xem Video" AnchorPane.bottomAnchor="418.0" AnchorPane.leftAnchor="545.0" AnchorPane.rightAnchor="318.0" AnchorPane.topAnchor="155.0" />
-      <Label alignment="CENTER" layoutX="22.0" layoutY="155.0" prefHeight="27.0" prefWidth="380.0" text="Nhạc sĩ" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="468.0">
+      <Label fx:id="composerNameLabel" alignment="CENTER" layoutX="22.0" layoutY="155.0" prefHeight="27.0" prefWidth="380.0" text="Nhạc sĩ" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="468.0">
          <font>
             <Font size="18.0" />
          </font>

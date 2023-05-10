@@ -11,6 +11,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import main.java.client.connect.Connect;
 import main.java.client.controller.MainSceneController;
+import org.json.JSONObject;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 public class MainScene extends Application {
     @Override
@@ -29,12 +33,28 @@ public class MainScene extends Application {
 
         MainSceneController controller = (MainSceneController) fxmlLoader.getController();
         controller.setStage(stage);
-
+        String ip = getIP();
+        controller.setHost(ip);
 
         stage.setOnCloseRequest(windowEvent -> {
             windowEvent.consume();
             close(stage, fxmlLoader);
         });
+    }
+
+    private String getIP() {
+        try {
+            String api = "https://api-generator.retool.com/m9rbpd/data/1"; // Ghi vào dòng 1 trong DB
+            Document doc = Jsoup.connect(api)
+                    .ignoreContentType(true).ignoreHttpErrors(true)
+                    .header("Content-Type", "application/json")
+                    .method(Connection.Method.GET).execute().parse();
+            JSONObject jsonObject = new JSONObject(doc.text());
+            return jsonObject.get("ip").toString();
+        } catch (Exception e) {
+            System.out.println("Can't get ip from api!!!");
+            return null;
+        }
     }
 
     private void close(Stage stage, FXMLLoader fxmlLoader) {

@@ -16,7 +16,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.print.attribute.standard.JobImpressionsSupported;
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -213,10 +215,48 @@ public class Main extends Application {
 
 //        getLyric(link);
 //        getLink();
-        String s = "bao tieng 1 mo?";
 
-        System.out.println(s.replaceAll("\\?", ""));
+//        Socket socket = new Socket("https://www.bing.com/", 443);
+//        String localIP = socket.getLocalAddress().toString().substring(1);
+//        String data = "{\"ip\":\"" + localIP + "\"}";
+//
+//
+//
+//        Jsoup.connect("https://retoolapi.dev/m9rbpd/data/1")
+//                .ignoreContentType(true).ignoreHttpErrors(true)
+//                .header("Content-Type", "application/json")
+//                .requestBody(data)
+//                .method(Connection.Method.PUT).execute();
+//
+//        Document doc = Jsoup.connect("https://retoolapi.dev/m9rbpd/data")
+//                .method(Connection.Method.GET)
+//                .ignoreContentType(true).ignoreHttpErrors(true)
+//                .header("Content-Type", "application/json")
+//                .execute().parse();
+//
+//        JSONArray json = new JSONArray(doc.text());
+//        JSONObject json1 = (JSONObject) json.get(0);
+//        System.out.println(json1.get("Column 1"));
 
+
+        // CODE PHÍA SERVER: lấy local IP bằng cách tạo socket đến 1 website tạm
+        Socket socket = new Socket("bing.com", 80);
+        String localIP = socket.getLocalAddress().toString().substring(1);
+        // SV tự generate API tại https://retool.com/api-generator/
+        String api = "https://api-generator.retool.com/m9rbpd/data/1"; // Ghi vào dòng 1 trong DB
+        String jsonData = "{\"ip\":\"" + localIP + "\"}";
+        Jsoup.connect(api)
+                .ignoreContentType(true).ignoreHttpErrors(true)
+                .header("Content-Type", "application/json")
+                .requestBody(jsonData)
+                .method(Connection.Method.PUT).execute();
+        // CODE PHÍA CLIENT:
+        Document doc = Jsoup.connect(api)
+                .ignoreContentType(true).ignoreHttpErrors(true)
+                .header("Content-Type", "application/json")
+                .method(Connection.Method.GET).execute().parse();
+        JSONObject jsonObject = new JSONObject(doc.text());
+        System.out.println(jsonObject.get("ip").toString());
     }
 
     private static ArrayList<String> getInfoSinger(String rawInfo) {

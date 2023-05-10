@@ -1,6 +1,8 @@
 package main.java.server;
 
 import main.java.client.connect.Connect;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,9 +16,30 @@ public class Server {
     private ServerSocket server = null;
     private int port;
 
-    public Server(int port) throws Exception{
-        server = new ServerSocket(port);
-        this.port = port;
+    public Server(int port) {
+        try {
+            server = new ServerSocket(port);
+            this.port = port;
+        } catch (Exception e) {
+            System.out.println("Can't create SERVER");
+        }
+    }
+
+    private void ipConfig() {
+        try {
+            Socket socket = new Socket("bing.com", 80);
+            String localIP = socket.getLocalAddress().toString().substring(1);
+
+            String api = "https://api-generator.retool.com/m9rbpd/data/1"; // Ghi vào dòng 1 trong DB
+            String jsonData = "{\"ip\":\"" + localIP + "\"}";
+            Jsoup.connect(api)
+                    .ignoreContentType(true).ignoreHttpErrors(true)
+                    .header("Content-Type", "application/json")
+                    .requestBody(jsonData)
+                    .method(Connection.Method.PUT).execute();
+        } catch (Exception e) {
+            System.out.println("Can't config IP!!!");
+        }
     }
 
     private void handleClient() throws IOException {
