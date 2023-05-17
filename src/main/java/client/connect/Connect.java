@@ -197,8 +197,10 @@ public class Connect implements Runnable {
 
                 return allInfo;
             } else {
+                subTitle = subTitle.toLowerCase();
                 if (subTitle.contains("sĩ") || subTitle.contains("nhạc")
-                    || subTitle.contains("nhóm") || subTitle.contains("ban")) {
+                    || subTitle.contains("nhóm") || subTitle.contains("ban")
+                    || subTitle.contains("rapper")) {
                     String linkWiki = getLinkWikiFromGG(title);
                     mySleep();
                     LinkedHashMap<String, String> singerInfo = null;
@@ -257,8 +259,18 @@ public class Connect implements Runnable {
 
             }
 
-            for (Element e: element.getElementsByClass("junCMe")) {
-                String songName = e.getElementsByClass("title").text();
+            try {
+                if (element == null) {
+                    element = document.getElementsByClass("AxJnmb").first();
+                }
+            } catch (Exception e) {
+
+            }
+
+
+            for (Element e: element.getElementsByTag("a")) {
+                Element tmp = e.getElementsByClass("junCMe").first();
+                String songName = tmp.getElementsByClass("title").text();
                 songs.add(songName);
             }
 
