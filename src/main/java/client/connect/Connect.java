@@ -1,20 +1,26 @@
 package main.java.client.connect;
 
+import com.sun.jdi.connect.spi.TransportService;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import javax.sound.midi.Soundbank;
+import javax.swing.plaf.IconUIResource;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAOtherPrimeInfo;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Random;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 
 public class Connect implements Runnable {
     private int port;
@@ -22,24 +28,98 @@ public class Connect implements Runnable {
     private BufferedWriter ouput;
     private BufferedReader input;
     private ObjectOutputStream outputOb;
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+    private String SECRET_KEY;
 
     public Connect(Socket socket) throws Exception{
-        this.socket = socket;
         System.out.println("Accept Client: " + socket.toString());
+        this.socket = socket;
         outputOb = new ObjectOutputStream(socket.getOutputStream());
         input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        ouput = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+        generateKeyPairAndSend();
+    }
+
+    private void generateKeyPairAndSend () {
+        try {
+            // nhan duoc client gui public key qua client
+            SecureRandom sr = new SecureRandom();
+            java.security.KeyPairGenerator kpg = java.security.KeyPairGenerator.getInstance("RSA");
+            kpg.initialize(1024, sr);
+            KeyPair kp = kpg.generateKeyPair();
+            publicKey = kp.getPublic();
+            privateKey = kp.getPrivate();
+
+            LinkedHashMap<String, Key> keyHashMap = new LinkedHashMap<String, Key>();
+            keyHashMap.put("publicKey", publicKey);
+
+            outputOb.writeObject(keyHashMap);
+            receiveAES();
+        } catch (Exception e) {
+            System.out.println("Can't send public key!!!");
+        }
+    }
+
+    private void receiveAES() {
+        try {
+            String encryptStr = input.readLine();
+            PKCS8EncodedKeySpec pkc = new PKCS8EncodedKeySpec(privateKey.getEncoded());
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            PrivateKey privateKey1 = factory.generatePrivate(pkc);
+            Cipher c = Cipher.getInstance("RSA");
+            c.init(Cipher.DECRYPT_MODE, privateKey1);
+            byte[] decryptByte = c.doFinal(Base64.getDecoder().decode(encryptStr));
+            SECRET_KEY = new String(decryptByte);
+        } catch (Exception e) {
+            System.out.println("Can't receive AES!!!");
+        }
+    }
+
+    private String decryptDataAES(String data) {
+        try {
+            SecretKeySpec spec = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            Cipher c = Cipher.getInstance("AES");
+            c.init(Cipher.DECRYPT_MODE, spec);
+            byte[] decryptedByte = c.doFinal(Base64.getDecoder().decode(data.getBytes()));
+            return new String(decryptedByte);
+        } catch (Exception e) {
+            System.out.println("Can't decrypt data!!!");
+            return null;
+        }
+    }
+
+    private String ecryptDataAES(byte[] byteOut) {
+        try {
+            SecretKeySpec spec = new SecretKeySpec(SECRET_KEY.getBytes(), "AES");
+            Cipher c = Cipher.getInstance("AES");
+            c.init(Cipher.ENCRYPT_MODE, spec);
+            byte[] encryptedByte = c.doFinal(byteOut);
+            String encryptedData = Base64.getEncoder().encodeToString(encryptedByte);
+
+            return encryptedData;
+        } catch (Exception e) {
+            System.out.println("Can't encrypt data!!!");
+            return null;
+        }
     }
 
     // gửi dữ liệu qua client
     private void send(LinkedHashMap<String, String> data) {
         try {
-            outputOb.writeObject(data);
+
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(byteOut);
+            out.writeObject(data);
+            String ecryptedData = ecryptDataAES(byteOut.toByteArray());
+//            outputOb.writeObject(data);
 //            ouput = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//            ouput.write(data + "\n");
-//            ouput.flush();
-//            hehe.flush();
+            ouput.write(ecryptedData + "\n");
+            ouput.flush();
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Can't send data to client!!!");
         }
     }
 
@@ -47,9 +127,10 @@ public class Connect implements Runnable {
     private String receive() {
         try {
             String data = input.readLine();
-            return data;
+            return decryptDataAES(data);
         } catch (Exception e) {
-            return "";
+            System.out.println("Can't receive data!!!");
+            return null;
         }
     }
 
@@ -88,7 +169,6 @@ public class Connect implements Runnable {
                 if (composer == null) {
                     mySleep();
                     String link = getLinkLyricFromBHH(  googleResult);
-                    System.out.println(link);
                     mySleep();
                     composer = getComposerFromBHH(link, googleResult);
                     songInfo.putIfAbsent("songComposer", composer);
@@ -99,10 +179,46 @@ public class Connect implements Runnable {
                     songInfo.putIfAbsent("songComposer", composer);
                 }
                 songInfo.putIfAbsent("linkVideo", linkVideo);
-                return songInfo;
+
+                // tim thong tin ca si ke ben bai hat
+                String linkWiki = getLinkWikiFromGG(subTitle);
+                mySleep();
+                LinkedHashMap<String, String> allInfo = new LinkedHashMap<>();
+                LinkedHashMap<String, String> singerInfo = null;
+
+                if (linkWiki != null) {
+                    singerInfo = getInfoFormWiki(linkWiki);
+                    allInfo.putAll(singerInfo);
+                }
+                if (songInfo != null)
+                    allInfo.putAll(songInfo);
+
+                allInfo.putIfAbsent("find", "song");
+
+                return allInfo;
             } else {
-//                System.out.println("Ca so");
-                System.out.println(title);
+                if (subTitle.contains("sĩ") || subTitle.contains("nhạc")
+                    || subTitle.contains("nhóm") || subTitle.contains("ban")) {
+                    String linkWiki = getLinkWikiFromGG(title);
+                    mySleep();
+                    LinkedHashMap<String, String> singerInfo = null;
+                    LinkedHashMap<String, String> allInfo = new LinkedHashMap<>();
+
+                    if (linkWiki != null) {
+                        singerInfo = getInfoFormWiki(linkWiki);
+                        allInfo.putAll(singerInfo);
+                    }
+
+                    allInfo.putIfAbsent("title", title);
+                    allInfo.putIfAbsent("find", "singer");
+
+                    ArrayList<String> songs = getSongsFromGoogle(title);
+                    mySleep();
+                    String songStr = String.join(",", songs);
+                    if (songs != null)
+                        allInfo.putIfAbsent("songs", songStr);
+                    return allInfo;
+                }
             }
             return null;
         } catch (Exception e) {
@@ -110,7 +226,51 @@ public class Connect implements Runnable {
         }
     }
 
-    // dùng gg search để tìm tên bài hát và ca sĩ và link bài hát
+    private ArrayList<String> getSongsFromGoogle(String data) {
+        try {
+            ArrayList<String> songs = new ArrayList<>();
+            String q = "Bài hát của " + data;
+            String ggSearchUrl = "https://www.google.com/search?q=";
+            String fullUrl = ggSearchUrl + q;
+
+
+            System.out.println(fullUrl);
+            Document document = Jsoup.connect(fullUrl)
+                    .followRedirects(false)
+                    .execute().parse();
+
+            Element element = null;
+
+            try {
+                if (element == null) {
+                    element = document.getElementsByClass("uciohe").last();
+                }
+            } catch (Exception e) {
+
+            }
+
+            try {
+                if (element == null) {
+                    element = document.getElementsByClass("AxJnmb Wdsnue gIcqHd").last();
+                }
+            } catch (Exception e) {
+
+            }
+
+            for (Element e: element.getElementsByClass("junCMe")) {
+                String songName = e.getElementsByClass("title").text();
+                songs.add(songName);
+            }
+
+            return songs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Can't get songs from Google!!!");
+            return null;
+        }
+    }
+
+    // dùng gg search để tìm tên bài hát và ca sĩ và link bài hát, hoặc tìm kiếm thông tin cá nhân
     private LinkedHashMap<String, String> getResponseFromGoogle(String data) {
         try {
 
@@ -141,13 +301,8 @@ public class Connect implements Runnable {
             songInfo.putIfAbsent("title", title);
 
             Elements wx62f_pzpZlf_x7XAkb = rnct.getElementsByClass("wx62f PZPZlf x7XAkb");
-            String[] splitString = wx62f_pzpZlf_x7XAkb.get(0).text().split("\\s");
             String subTitle = wx62f_pzpZlf_x7XAkb.get(0).text();
 
-            String singerName = "";
-            for (int i = 3; i < splitString.length; i++) {
-                singerName += splitString[i] + " ";
-            }
             songInfo.putIfAbsent("subTitle", subTitle);
 
             try {
@@ -157,7 +312,6 @@ public class Connect implements Runnable {
             } catch (Exception e ) {
                 songInfo.putIfAbsent("linkVideo", null);
             }
-
 
             return songInfo;
         } catch (Exception e) {
@@ -198,7 +352,6 @@ public class Connect implements Runnable {
 
             for (Element spans: ujudUb) {
                 for (Element span: spans.getElementsByTag("span")) {
-//                System.out.println(span.text());
                     lyric += span.text() + "\n";
                 }
             }
@@ -207,9 +360,12 @@ public class Connect implements Runnable {
 
             return returnHashMap;
         } catch (Exception e) {
+            System.out.println("Can't get lyric from Google!!!");
             return null;
         }
     }
+
+
 
     // lấy thông tin tác giả của bài hát thông qua gg search
     private String getComposerFormGG(LinkedHashMap<String, String> songInfo) {
@@ -239,7 +395,6 @@ public class Connect implements Runnable {
         }
 
     }
-
 
     // lấy thông tin tác giả của bài hát thông qua web baihathay.net
     private String getComposerFromBHH(String linkLyric, LinkedHashMap<String, String> songInfo) {
@@ -353,10 +508,48 @@ public class Connect implements Runnable {
         }
     }
 
-    private String getLinkFormWiki(String name) {
+    private String getLinkWikiFromGG(String subTitle) {
         try {
-            String apiLink = "https://vi.wikipedia.org/w/api.php?action=opensearch&search=";
-            String url = apiLink + name;
+            LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
+            String domain = "https://www.google.com/search?q=";
+
+            String name = "";
+            if (subTitle.contains("Bài hát")) {
+                String[] sub = subTitle.split(" ");
+                for (int i = 3; i < sub.length; i++) {
+                    name += sub[i] + " ";
+                }
+
+                if (name.contains("và")) {
+                    name = name.strip();
+                    name = name.split("và")[0];
+                }
+            } else {
+                name = subTitle;
+            }
+
+            String fullUrl = domain + name;
+
+            Document doc = Jsoup.connect(fullUrl)
+                    .followRedirects(false)
+                    .execute().parse();
+
+            Element tagA = doc.getElementsByClass("ruhjFe NJLBac fl").first();
+            String linkWiki = tagA.attr("href");
+            String nameFromLink = linkWiki.split("/")[linkWiki.split("/").length-1];
+
+            return nameFromLink;
+
+        } catch (Exception e) {
+            System.out.println("Can't get link info from Google!!!");
+            return null;
+        }
+    }
+
+    private LinkedHashMap<String, String> getInfoFormWiki(String link) {
+        try {
+            String apiLink = "https://vi.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=json&titles=";
+            String url = apiLink + link;
 
             Document doc = Jsoup.connect(url)
                     .method(Connection.Method.GET)
@@ -364,26 +557,115 @@ public class Connect implements Runnable {
                     .ignoreContentType(true)
                     .execute().parse();
 
-            JSONArray json = new JSONArray(doc.text());
+            JSONObject json = new JSONObject(doc.text());
+            JSONObject query = json.getJSONObject("query");
+            JSONObject pages = query.getJSONObject("pages");
 
-            JSONArray links = (JSONArray) json.get(3);
+            String pageId = pages.keySet().toString();
+//        pageId = pageId.replaceAll("\\[", "");
+            pageId = pageId.replaceAll("]|\\[", "");
 
-            String link = links.get(0).toString();
+            JSONObject page = pages.getJSONObject(pageId);
+            JSONArray revisions = page.getJSONArray("revisions");
+            JSONObject revision = (JSONObject) revisions.get(0);
+            String content = revision.get("*").toString();
 
-            String[] subString = link.split("/");
-            String singerName = subString[subString.length - 1];
-            String decodeSingerName = URLDecoder.decode(singerName, StandardCharsets.UTF_8);
-//            System.out.println(decodeSingerName);
+            String[] subContent = content.split("'''");
+            String name = subContent[1];
 
-            return null;
+            String fullName = "";
+            String dateOfBirth = "";
+            String placeOfBirth = "";
+            String occupation = "";
+            String genre = "";
+            String[] infoContent = subContent[0].replaceAll("\\| ", "").split("\n");
+
+            for (String str: infoContent) {
+                if(!str.contains(" = ")) continue;
+                String key = str.split("=")[0].strip();
+                String value = str.split("=")[1].strip();
+                if (key.equalsIgnoreCase("birth_name")
+                        || key.equalsIgnoreCase("tên khai sinh")) {
+                    fullName = value;
+                }
+                if (key.equalsIgnoreCase("birth_date")
+                        || key.equalsIgnoreCase("ngày sinh")) {
+                    value = value.replaceAll("\\{", "")
+                            .replaceAll("}", "");
+                    String[] subValue = value.split("\\|");
+                    dateOfBirth = subValue[3] + "/" + subValue [2] + "/" + subValue[1];
+                }
+                if (key.equalsIgnoreCase("birth_place")
+                        || key.equalsIgnoreCase("nơi sinh")) {
+                    placeOfBirth = value.replaceAll("\\[", "")
+                            .replaceAll("]", "");
+
+                }
+                if (key.equalsIgnoreCase("genre")
+                        || key.equalsIgnoreCase("thể loại âm nhạc")) {
+                    if (value.contains("|")) {
+                        value = value.replaceAll("\\[", "")
+                                .replaceAll("]", "")
+                                .replaceAll("\\{", "")
+                                .replaceAll("}", "");
+                        String[] subStr = value.split("\\|");
+                        for (int i = 1; i < subStr.length; i++) {
+                            genre += subStr[i] + " ";
+                        }
+                    } else {
+                        value = value.replaceAll("\\[", "")
+                                .replaceAll("]", "")
+                                .replaceAll("\\{", "")
+                                .replaceAll("}", "");
+                        genre = value;
+                    }
+                }
+                if (key.equalsIgnoreCase("occupation")
+                        || key.equalsIgnoreCase("nghề nghiệp")) {
+                    if (value.contains("|")) {
+                        value = value.replaceAll("\\[", "")
+                                .replaceAll("]", "")
+                                .replaceAll("\\{", "")
+                                .replaceAll("}", "");
+                        String[] subStr = value.split("\\|");
+                        for (int i = 1; i < subStr.length; i++) {
+                            occupation += subStr[i] + " ";
+                        }
+                    }
+                    else {
+                        value = value.replaceAll("\\[", "")
+                                .replaceAll("]", "")
+                                .replaceAll("\\{", "")
+                                .replaceAll("}", "");
+                        genre = value;
+                    }
+                }
+            }
+
+            LinkedHashMap<String, String> returnHashMap = new LinkedHashMap<>();
+            if (fullName.isBlank())
+                returnHashMap.putIfAbsent("fullName", name);
+            else
+                returnHashMap.putIfAbsent("fullName", fullName);
+            if (!dateOfBirth.isBlank())
+                returnHashMap.putIfAbsent("dateOfBirth", dateOfBirth);
+            if (!placeOfBirth.isBlank())
+                returnHashMap.putIfAbsent("placeOfBirth", placeOfBirth);
+            if (!genre.isBlank())
+                returnHashMap.putIfAbsent("genre", genre);
+            if (!occupation.isBlank())
+                returnHashMap.putIfAbsent("occupation", occupation);
+
+            return returnHashMap;
         } catch (Exception e) {
+            System.out.println("Can't get infor from wiki!!!");
             return null;
         }
     }
 
     private void mySleep() {
         Random ran = new Random();
-        int ranNum = 1000 + ran.nextInt(400);
+        int ranNum = 2000 + ran.nextInt(1000);
         int num = 1;
         for (int i = 0; i < ranNum; i++) {
             num += ranNum * 3 / 2 + ranNum;
@@ -400,6 +682,7 @@ public class Connect implements Runnable {
                     break;
                 }
                 LinkedHashMap<String, String> processedData = processData(data);
+
                 send(processedData);
             }
             System.out.println("Close socket: " + socket.toString());

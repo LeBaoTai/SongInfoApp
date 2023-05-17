@@ -16,6 +16,10 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+
 public class MainScene extends Application {
     @Override
     public void start(Stage stage) throws Exception {
@@ -61,7 +65,7 @@ public class MainScene extends Application {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Thoát");
         alert.setHeaderText("Bạn đang thoát app!!!");
-        alert.setContentText("Bạn chắc chắn chứ :<<");
+        alert.setContentText("Bạn chắc chắn chứ?");
 
         if (alert.showAndWait().get() == ButtonType.OK) {
             System.out.println("Closed");
