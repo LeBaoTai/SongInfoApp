@@ -18,6 +18,7 @@ public class Server {
         try {
             server = new ServerSocket(port);
             this.port = port;
+            ipConfig();
         } catch (Exception e) {
             System.out.println("Can't create SERVER");
         }
@@ -30,6 +31,7 @@ public class Server {
 
             String api = "https://api-generator.retool.com/m9rbpd/data/1"; // Ghi vào dòng 1 trong DB
             String jsonData = "{\"ip\":\"" + localIP + "\"}";
+            System.out.println(localIP);
             Jsoup.connect(api)
                     .ignoreContentType(true).ignoreHttpErrors(true)
                     .header("Content-Type", "application/json")

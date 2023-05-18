@@ -37,8 +37,8 @@ public class MainScene extends Application {
 
         MainSceneController controller = (MainSceneController) fxmlLoader.getController();
         controller.setStage(stage);
-        String ip = getIP();
-        controller.setHost(ip);
+//        String ip = getIP();
+//        controller.setHost(ip);
 
         stage.setOnCloseRequest(windowEvent -> {
             windowEvent.consume();

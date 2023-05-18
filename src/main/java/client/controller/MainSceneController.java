@@ -14,6 +14,10 @@ import javafx.scene.web.WebView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import main.java.client.connect.Connect;
+import org.json.JSONObject;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -63,20 +67,37 @@ public class MainSceneController {
 
     public MainSceneController() {
         try {
+            host = getIP();
             conn = new Socket(host, port);
             input = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             output = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
             inputOb = new ObjectInputStream(conn.getInputStream());
-
+            System.out.println(host);
             receivePublicKey();
 
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Can't create client!!!");
         }
 
     }
 
-    private void receivePublicKey() {
+    private String getIP() {
+        try {
+            String api = "https://api-generator.retool.com/m9rbpd/data/1"; // Ghi vào dòng 1 trong DB
+            Document doc = Jsoup.connect(api)
+                    .ignoreContentType(true).ignoreHttpErrors(true)
+                    .header("Content-Type", "application/json")
+                    .method(Connection.Method.GET).execute().parse();
+            JSONObject jsonObject = new JSONObject(doc.text());
+            return jsonObject.get("ip").toString();
+        } catch (Exception e) {
+            System.out.println("Can't get ip from api!!!");
+            return null;
+        }
+    }
+
+        private void receivePublicKey() {
         try {
             LinkedHashMap<String, Key> keyHashMap = (LinkedHashMap<String, Key>) inputOb.readObject();
             publicKeyServer = (PublicKey) keyHashMap.get("publicKey");
