@@ -198,9 +198,11 @@ public class Connect implements Runnable {
                 return allInfo;
             } else {
                 subTitle = subTitle.toLowerCase();
+                System.out.println(subTitle.contains("sĩ") || subTitle.contains("nhạc"));
                 if (subTitle.contains("sĩ") || subTitle.contains("nhạc")
                     || subTitle.contains("nhóm") || subTitle.contains("ban")
-                    || subTitle.contains("rapper")) {
+                    || subTitle.contains("rapper") || subTitle.contains("c s")
+                    || subTitle.contains("m n")) {
                     String linkWiki = getLinkWikiFromGG(title);
                     mySleep();
                     LinkedHashMap<String, String> singerInfo = null;

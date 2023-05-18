@@ -130,7 +130,7 @@ public class test {
     }
 
     public static void main(String[] args) {
-        String data = "Hùng quân";
+        String data = "vũ cast tường";
         try {
 //            System.out.println("data ham tik gg" + data);
             String ggSearchUrl = "https://www.google.com/search?q=";
@@ -172,8 +172,10 @@ public class test {
             }
 
 
-            System.out.println(subTitle);
-            System.out.println(subTitle.toLowerCase().endsWith("sĩ"));
+            String sub = subTitle.toLowerCase();
+            System.out.println(sub);
+
+            System.out.println(sub.contains("c s"));
             System.out.println(title);
 
         } catch (Exception e) {
